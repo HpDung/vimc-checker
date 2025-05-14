@@ -1,5 +1,5 @@
 import express from "express";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import nodemailer from "nodemailer";
 import fs from "fs";
 
@@ -9,7 +9,12 @@ const LOG_FILE = "sent_links.log";
 const EMAIL_TO = "svcmarineservices@gmail.com";
 
 async function getInternalLinks() {
-  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox'],
+    executablePath: '/usr/bin/google-chrome' // Chrome hệ thống trên Render
+  });
+
   const page = await browser.newPage();
   await page.goto("https://vimc-shipping.com", { waitUntil: "networkidle2" });
 
@@ -63,10 +68,11 @@ app.get("/", async (req, res) => {
 
     res.send(message);
   } catch (err) {
+    console.error("Lỗi khi chạy script:", err);
     res.status(500).send("Lỗi: " + err.message);
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`✅ Server đang chạy tại cổng ${PORT}`);
 });
