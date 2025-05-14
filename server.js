@@ -3,11 +3,6 @@ import puppeteer from "puppeteer";
 import nodemailer from "nodemailer";
 import fs from "fs";
 
-import express from "express";
-import puppeteer from "puppeteer";
-import nodemailer from "nodemailer";
-import fs from "fs";
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 const LOG_FILE = "sent_links.log";
@@ -30,13 +25,13 @@ async function sendEmail(subject, body) {
   let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "yourgmail@gmail.com",
-      pass: "your_app_password_here",
+      user: "jroa8487@gmail.com",
+      pass: "emii aevh ffun hirk",
     },
   });
 
   await transporter.sendMail({
-    from: '"VIMC Bot" <yourgmail@gmail.com>',
+    from: '"VIMC Bot" <jroa8487@gmail.com>',
     to: EMAIL_TO,
     subject,
     text: body,
