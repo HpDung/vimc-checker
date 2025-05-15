@@ -1,5 +1,5 @@
 import express from "express";
-import puppeteer from "puppeteer-core";
+import puppeteer from "puppeteer";
 import nodemailer from "nodemailer";
 import fs from "fs";
 
@@ -10,9 +10,8 @@ const EMAIL_TO = "svcmarineservices@gmail.com";
 
 async function getInternalLinks() {
   const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox'],
-    executablePath: '/usr/bin/google-chrome' // Chrome hệ thống trên Render
+    headless: "new", // tránh warning
+    args: ['--no-sandbox']
   });
 
   const page = await browser.newPage();
@@ -44,6 +43,9 @@ async function sendEmail(subject, body) {
 }
 
 app.get("/", async (req, res) => {
+  const now = new Date().toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
+  res.send(`🕓 Script bắt đầu lúc ${now}. Kết quả sẽ được gửi qua email nếu có link mới.`);
+
   try {
     const allLinks = await getInternalLinks();
     const loggedLinks = fs.existsSync(LOG_FILE)
@@ -51,25 +53,16 @@ app.get("/", async (req, res) => {
       : [];
 
     const newLinks = allLinks.filter((link) => !loggedLinks.includes(link));
-    const now = new Date().toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
-
-    let message;
 
     if (newLinks.length > 0) {
       const body = `🕓 ${now}\n🔗 Link mới:\n` + newLinks.map((l) => `• ${l}`).join("\n");
       await sendEmail(`[VIMC] Link mới từ trang chủ`, body);
       fs.appendFileSync(LOG_FILE, newLinks.join("\n") + "\n");
-      message = `Đã gửi ${newLinks.length} link mới`;
     } else {
-      const body = `🕓 ${now}\n✅ Không có link mới.`;
-      await sendEmail(`[VIMC] Không có link mới`, body);
-      message = "Không có link mới nào.";
+      await sendEmail(`[VIMC] Không có link mới`, `🕓 ${now}\n✅ Không có link mới hôm nay`);
     }
-
-    res.send(message);
   } catch (err) {
-    console.error("Lỗi khi chạy script:", err);
-    res.status(500).send("Lỗi: " + err.message);
+    console.error("Lỗi khi chạy puppeteer:", err.message);
   }
 });
 
