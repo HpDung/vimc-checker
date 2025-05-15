@@ -10,8 +10,8 @@ const EMAIL_TO = "svcmarineservices@gmail.com";
 
 async function getInternalLinks() {
   const browser = await puppeteer.launch({
-    headless: "new", // tránh warning
-    args: ['--no-sandbox']
+    headless: "new",
+    args: ["--no-sandbox"],
   });
 
   const page = await browser.newPage();
@@ -44,7 +44,9 @@ async function sendEmail(subject, body) {
 
 app.get("/", async (req, res) => {
   const now = new Date().toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
-  res.send(`🕓 Script bắt đầu lúc ${now}. Kết quả sẽ được gửi qua email nếu có link mới.`);
+
+  // 🟢 Trả phản hồi NGAY để không bị Render loading mãi
+  res.send(`✅ App đang chạy tại ${now}. Email sẽ gửi nếu có link mới.`);
 
   try {
     const allLinks = await getInternalLinks();
@@ -62,7 +64,7 @@ app.get("/", async (req, res) => {
       await sendEmail(`[VIMC] Không có link mới`, `🕓 ${now}\n✅ Không có link mới hôm nay`);
     }
   } catch (err) {
-    console.error("Lỗi khi chạy puppeteer:", err.message);
+    console.error("Lỗi xử lý puppeteer:", err.message);
   }
 });
 
